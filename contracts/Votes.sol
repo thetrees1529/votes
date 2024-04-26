@@ -41,6 +41,7 @@ contract Votes is AccessControl {
         for(uint i; i < newNfts.length; i ++) {
             NftInput memory newNft = newNfts[i];
             Nft nft = new Nft(newNft.uri, newNft.name, newNft.symbol);
+            nft.grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
             _nfts.push(nft);
         }
     }
