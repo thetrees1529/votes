@@ -6,12 +6,6 @@ import "@thetrees1529/solutils/contracts/gamefi/Nft.sol";
 
 contract Votes is AccessControl {
 
-    struct NftInput {
-        string uri;
-        string name;
-        string symbol;
-    }
-
     struct VoteInput {
         uint nftIndex;
         uint count;
@@ -37,13 +31,11 @@ contract Votes is AccessControl {
         _referral = newReferral;
     }
 
-    function addNfts(NftInput[] memory newNfts) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setNfts(Nft[] calldata newNfts) external onlyRole(DEFAULT_ADMIN_ROLE) {
         for(uint i; i < newNfts.length; i ++) {
-            NftInput memory newNft = newNfts[i];
-            Nft nft = new Nft(newNft.uri, newNft.name, newNft.symbol);
-            nft.grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-            _nfts.push(nft);
+            require(newNfts[i].hasRole(DEFAULT_ADMIN_ROLE, address(this)), "Please first grant the admin role to this contract.");
         }
+        _nfts = newNfts;
     }
 
     function getInfo() external view returns(bool settled, uint winningNftIndex, uint price, uint winningsPerNft, uint consolationPerNft, uint consolation, uint devFee, address devAddress, Nft[] memory nfts, uint[] memory totalSupplys) {
