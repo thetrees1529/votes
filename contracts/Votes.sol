@@ -3,8 +3,9 @@
 pragma solidity 0.8.19;
 
 import "@thetrees1529/solutils/contracts/gamefi/Nft.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract Votes is AccessControl {
+contract Votes is AccessControl, Pausable {
 
     struct VoteInput {
         uint nftIndex;
@@ -31,10 +32,15 @@ contract Votes is AccessControl {
         _referral = newReferral;
     }
 
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _pause();
+    }
+
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _unpause();
+    }
+
     function setNfts(Nft[] calldata newNfts) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        for(uint i; i < newNfts.length; i ++) {
-            require(newNfts[i].hasRole(DEFAULT_ADMIN_ROLE, address(this)), "Please first grant the admin role to this contract.");
-        }
         _nfts = newNfts;
     }
 
@@ -82,7 +88,7 @@ contract Votes is AccessControl {
         }
     }
 
-    function vote(address referrer, VoteInput[] calldata inputs) external payable {
+    function vote(address referrer, VoteInput[] calldata inputs) external payable whenNotPaused {
         require(!_settled, "Voting has already _settled.");
         uint funds = msg.value;
         for(uint i; i < inputs.length; i ++) {
